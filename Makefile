@@ -1,3 +1,4 @@
+.ONESHELL:
 .DEFAULT_GOAL := help
 
 PROJECT := notifymem
@@ -11,20 +12,20 @@ build: $(SOURCES) ## Build the project
 
 .PHONY: help
 help: ## Display help
-	@COL_W=20
+	@COL_W=10
 	@grep -h '##' $(MAKEFILE_LIST) | \
 	  grep -v grep | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-'$$COL_W's\033[0m %s\n", $$1, $$2}'
 
 .PHONY: logs
-logs:
+logs: ## Display logs for systemd service (journalctl)
 	journalctl -u $(PROJECT) -f
 
 .PHONY: reload
-reload:
+reload: ## Reload systemd service
 	sudo systemctl daemon-reload
 
 .PHONY: restart
-restart:
+restart: ## Restart systemd service
 	sudo systemctl restart $(PROJECT)
 
 .PHONY: run
@@ -32,15 +33,15 @@ run: build ## Run the project
 	./$(BINARY)
 
 .PHONY: start
-start:
+start: ## Start systemd service
 	sudo systemctl start $(PROJECT)
 
 .PHONY: status
-status:
+status: ## Display status of systemd service
 	sudo systemctl status $(PROJECT)
 
 .PHONY: stop
-stop:
+stop: ## Stop systemd service
 	sudo systemctl stop $(PROJECT)
 
 .PHONY: test
