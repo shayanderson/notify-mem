@@ -23,12 +23,13 @@ type MonitorOptions struct {
 }
 
 type Monitor struct {
-	debugFunc   func(string)
-	interval    time.Duration
-	lastSentAt  time.Time
-	notifier    Notifier
-	resendDelay time.Duration
-	threshold   int
+	debugFunc         func(string)
+	interval          time.Duration
+	lastSentAt        time.Time
+	notificationsSent int
+	notifier          Notifier
+	resendDelay       time.Duration
+	threshold         int
 }
 
 func NewMonitor(notifier Notifier, opts MonitorOptions) (*Monitor, error) {
@@ -63,12 +64,14 @@ func NewMonitor(notifier Notifier, opts MonitorOptions) (*Monitor, error) {
 	return m, nil
 }
 
+// debug prints a debug message when debug mode is enabled
 func (m *Monitor) debug(msg string) {
 	if m.debugFunc != nil {
 		m.debugFunc(msg)
 	}
 }
 
+// isThresholdReached checks if the memory usage threshold has been reached
 func (m *Monitor) isThresholdReached() (bool, int, error) {
 	mem, err := readMemory()
 	if err != nil {
@@ -87,6 +90,7 @@ func (m *Monitor) isThresholdReached() (bool, int, error) {
 	return false, usage, nil
 }
 
+// notify sends a notification if the resend delay has been reached
 func (m *Monitor) notify(usage int) error {
 	if time.Since(m.lastSentAt) < m.resendDelay {
 		m.debug("resend delay not reached")
@@ -94,13 +98,24 @@ func (m *Monitor) notify(usage int) error {
 	}
 
 	m.debug("sending notification")
+	fmt.Printf("threshold reached: %d%%\n", usage)
+	nSentStr := ""
+	if m.notificationsSent > 0 {
+		nSentStr = fmt.Sprintf(" (%d)", m.notificationsSent)
+	}
 	m.lastSentAt = time.Now()
-	return m.notifier.Notify(
-		"Memory Usage Threshold Reached [notifymem]",
+	err := m.notifier.Notify(
+		"Memory Usage Threshold Reached [notifymem]"+nSentStr,
 		fmt.Sprintf("Memory usage at %d%%", usage),
 	)
+	m.notificationsSent++
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
+// Run starts the monitor
 func (m *Monitor) Run(ctx context.Context) error {
 	m.debug("staring monitor")
 	for {
@@ -117,7 +132,6 @@ func (m *Monitor) Run(ctx context.Context) error {
 			m.debug(fmt.Sprintf("memory usage: %d%%", usage))
 
 			if reached {
-				m.debug(fmt.Sprintf("threshold reached: %d%%", usage))
 				if err := m.notify(usage); err != nil {
 					return err
 				}
@@ -127,6 +141,18 @@ func (m *Monitor) Run(ctx context.Context) error {
 	}
 }
 
+// Test executes a test to check memory usage and send a notification
+func (m *Monitor) Test() error {
+	m.debug("running test")
+	_, usage, err := m.isThresholdReached()
+	if err != nil {
+		return err
+	}
+	m.notify(usage)
+	return nil
+}
+
+// memoryUsage calculates memory usage as a percentage
 func memoryUsage(m memory) (int, error) {
 	if m.total == 0 {
 		return 0, errors.New("total memory is 0")
@@ -135,6 +161,7 @@ func memoryUsage(m memory) (int, error) {
 	return int((float64(m.total-m.avail) / float64(m.total)) * 100), nil
 }
 
+// readMemory reads memory information from /proc/meminfo
 func readMemory() (memory, error) {
 	m := memory{}
 	f, err := os.Open("/proc/meminfo")

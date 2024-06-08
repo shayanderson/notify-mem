@@ -10,10 +10,16 @@ Features:
 
 ## Usage
 
-Example usage that monitors memory usage by checking every 2 seconds, sends a notification when memory usage is above 80% and will not send another notification until after 60 seconds.
+Example usage that monitors memory usage by checking every 2 seconds, sends a notification when memory usage is above 80% and will not send another notification until after 10 seconds.
 
 ```bash
-notifymem -threshold 80 -delay 60 -interval 2
+notifymem -threshold 80 -delay 10 -interval 2
+```
+
+Run a test which will check memory usage and send a test notification:
+
+```bash
+notifymem -test
 ```
 
 ## Installation
@@ -25,14 +31,15 @@ Next, create a systemd service file in `/etc/systemd/system/notifymem.service` w
 ```ini
 [Unit]
 Description=notifymem service: notify when memory usage reaches a threshold
-After=network.target
+After=network.target,systemd-user-sessions.service,systemd-journald.service
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=3
 User=your-username
-ExecStart=/opt/notifymem/bin/notifymem -threshold 80 -delay 60 -interval 2
+ExecStart=/opt/notifymem/bin/notifymem -threshold 80 -delay 30 -interval 2
+Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus"
 
 [Install]
 WantedBy=multi-user.target
@@ -42,6 +49,7 @@ Make sure to:
 
 - replace `your-username` with your actual username
 - set `ExecStart` to the path where you copied the binary and use the desired options
+- set `Environment` to the correct `DBUS_SESSION_BUS_ADDRESS` value for your system, which can be found by running `echo $DBUS_SESSION_BUS_ADDRESS`
 
 Finally, enable and start the service:
 

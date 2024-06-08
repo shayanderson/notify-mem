@@ -1,6 +1,8 @@
 package notifymem
 
-import "fmt"
+import (
+	"os/exec"
+)
 
 type Notifier interface {
 	Notify(title, message string) error
@@ -13,7 +15,12 @@ func NewNotifier() *notifier {
 	return &notifier{}
 }
 
+// Notify sends a notification using notify-send
 func (n *notifier) Notify(title, message string) error {
-	fmt.Println("notify:", title, message)
+	cmd := exec.Command("notify-send", title, message)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
 	return nil
 }

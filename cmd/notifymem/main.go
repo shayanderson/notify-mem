@@ -24,13 +24,15 @@ func main() {
 		debug       bool
 		interval    int
 		resendDelay int
+		test        bool
 		threshold   int
 	}
 
 	f := flags{}
 	flag.BoolVar(&f.debug, "debug", false, "enable debug mode")
 	flag.IntVar(&f.interval, "interval", 2, "interval between memory checks in seconds")
-	flag.IntVar(&f.resendDelay, "delay", 30, "delay between notifications being sent in seconds")
+	flag.IntVar(&f.resendDelay, "delay", 10, "delay between notifications being sent in seconds")
+	flag.BoolVar(&f.test, "test", false, "run a test to check memory usage and send notification")
 	flag.IntVar(&f.threshold, "threshold", 80, "memory threshold as a percentage")
 	flag.Parse()
 
@@ -48,6 +50,14 @@ func main() {
 	m, err := notifymem.NewMonitor(n, mOpts)
 	if err != nil {
 		errorExit(err)
+	}
+
+	if f.test {
+		err := m.Test()
+		if err != nil {
+			errorExit(err)
+		}
+		os.Exit(0)
 	}
 
 	ctx := context.Background()
