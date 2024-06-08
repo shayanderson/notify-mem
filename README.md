@@ -10,7 +10,7 @@ Features:
 
 Example notification:
 
-![notifymem](/shayanderson/notify-mem/raw/main/notifymem.png)
+![notifymem](https://raw.githubusercontent.com/shayanderson/notify-mem/main/notifymem.png)
 
 ## Usage
 
