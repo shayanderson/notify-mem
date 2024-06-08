@@ -8,6 +8,10 @@ Features:
 - major Linux distributions are supported
 - configurable threshold, check memory usage interval and resend notification delay
 
+Example notification:
+
+![notifymem](/shayanderson/notify-mem/raw/main/notifymem.png)
+
 ## Usage
 
 Example usage that monitors memory usage by checking every 2 seconds, sends a notification when memory usage is above 80% and will not send another notification until after 10 seconds.
