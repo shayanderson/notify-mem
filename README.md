@@ -8,7 +8,7 @@ Features:
 - major Linux distributions are supported
 - configurable threshold, check memory usage interval and resend notification delay
 
-Example notification:
+Example desktop notification:
 
 ![notifymem](https://raw.githubusercontent.com/shayanderson/notify-mem/main/notifymem.png)
 
