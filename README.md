@@ -5,7 +5,7 @@ A simple tool to notify you when your system memory usage is too high.
 Features:
 
 - uses `notify-send` to send notifications when memory usage reaches a certain threshold
-- major Linux distributions are supported
+- built for Linux (tested on Ubuntu 22.04 X11)
 - configurable threshold, check memory usage interval and resend notification delay
 
 Example desktop notification:
@@ -14,7 +14,7 @@ Example desktop notification:
 
 ## Usage
 
-Example usage that monitors memory usage by checking every 2 seconds, sends a notification when memory usage is above 80% and will not send another notification until after 10 seconds.
+Example usage that monitors memory usage by checking every 2 seconds, sends a notification when memory usage is above 80% and will not resend another notification until after 10 seconds.
 
 ```bash
 notifymem -threshold 80 -delay 10 -interval 2

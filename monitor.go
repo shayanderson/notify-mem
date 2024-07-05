@@ -45,8 +45,8 @@ func NewMonitor(notifier Notifier, opts MonitorOptions) (*Monitor, error) {
 		threshold:   opts.Threshold,
 	}
 
-	if m.interval < 100*time.Millisecond {
-		return nil, errors.New("interval must be at least 100ms")
+	if m.interval < 1*time.Second {
+		return nil, errors.New("interval must be at least 1s")
 	}
 
 	if m.notifier == nil {
@@ -57,8 +57,8 @@ func NewMonitor(notifier Notifier, opts MonitorOptions) (*Monitor, error) {
 		return nil, errors.New("resend delay must be at least 5s")
 	}
 
-	if m.threshold < 0 || m.threshold > 100 {
-		return nil, errors.New("threshold must be between 0 and 100")
+	if m.threshold < 1 || m.threshold > 100 {
+		return nil, errors.New("threshold must be between 1 and 100")
 	}
 
 	return m, nil
@@ -156,6 +156,9 @@ func (m *Monitor) Test() error {
 func memoryUsage(m memory) (int, error) {
 	if m.total == 0 {
 		return 0, errors.New("total memory is 0")
+	}
+	if m.avail == 0 {
+		return 0, errors.New("available memory is 0")
 	}
 
 	return int((float64(m.total-m.avail) / float64(m.total)) * 100), nil
